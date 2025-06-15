@@ -91,7 +91,7 @@ public class PoligonosApp extends Application {
                 poligono.getPoints().addAll(point.x(), point.y());
             }
 
-            poligono.setFill(Color.BLUE);
+            poligono.setFill(Color.CADETBLUE);
             poligono.setStroke(Color.BLACK);
             root.getChildren().add(poligono);
         }
@@ -131,14 +131,15 @@ public class PoligonosApp extends Application {
      * "triângulo", "pentágono", "hexágono" ou apenas um "polígono" geral quando tiver mais de 6 lados.
      */
     protected List<String> tipoPoligonos(){
-        // TODO Apague esta linha e a próxima e implemente seu código
-        return List.of();
+        return pontosPoligonos.stream()
+                .flatMap(this::tipoPoligono)
+                .toList();
     }
 
     /**
      * Calcula o perímetro de cada polígono.
      * O perímetro é a soma da distância entre cada {@link Point} (x,y) do {@link Polygon}.
-     * Se você pensar em um polígono como um quadrado, o perímetro representa a distância que você percorreria
+     * Se você pensar num polígono como um quadrado, o perímetro representa a distância que você percorreria
      * se andasse ao redor da borda do quadrado, do ponto inicial até o último ponto.
      *
      * <p>Este método é mais complexo. A implementação dele deve usar a operação {@link Stream#flatMap(Function)} que
@@ -150,7 +151,7 @@ public class PoligonosApp extends Application {
      * possui um construtor {@link Point#Point(Point, Point)} que recebe 2 pontos,
      * cria um novo que contém:
      * (i) as coordenadas do segundo ponto e
-     * (ii) a distância entre os pontos no atributo {@link Point#distance} (acessado pelo método getter {@link Point#distance()}).
+     * (ii) a distância entre os pontos no atributo {@link Point#distance()} (acessado pelo metodo getter {@link Point#distance()}).
      * Tal construtor já soma a distância entre p1 e p2 com a distância do p1 com o ponto anterior a ele.</p>
      *
      * <p>Assim, você precisaria percorrer todos os pontos de um polígono, pegar um par de pontos e passar
@@ -175,9 +176,28 @@ public class PoligonosApp extends Application {
      *
      * @return uma lista contendo o perímetro de cada polígono
      */
-    protected List<Double> perimetros(){
-        // TODO Apague esta linha e a próxima e implemente seu código
-        return List.of();
+    protected List<Double> perimetros() {
+        return pontosPoligonos.stream()
+                .flatMap(this::calcularPerimetro)
+                .toList();
+
+    }
+
+    private Stream<String> tipoPoligono(List<Point> points) {
+        int size = points.size();
+        return switch (size) {
+            case 3 -> Stream.of("Triângulo");
+            case 4 -> Stream.of("Quadrilátero");
+            case 5 -> Stream.of("Pentágono");
+            case 6 -> Stream.of("Hexágono");
+            default -> Stream.of("Polígono");
+        };
+    }
+
+    private Stream<Double> calcularPerimetro(List<Point> points) {
+        return Stream.of(points.stream()
+                .reduce(points.get(points.size() - 1), Point::new)
+                .distance());
     }
 }
 
