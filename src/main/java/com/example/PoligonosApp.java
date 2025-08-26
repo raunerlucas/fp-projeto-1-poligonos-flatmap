@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -85,16 +86,11 @@ public class PoligonosApp extends Application {
         final var root = new Pane();
         final var scene = new Scene(root, 800, 600);
 
-        for (final var listaPontos : pontosPoligonos) {
-            final var poligono = new Polygon();
-            for (final Point point : listaPontos) {
-                poligono.getPoints().addAll(point.x(), point.y());
-            }
-
-            poligono.setFill(Color.CADETBLUE);
-            poligono.setStroke(Color.BLACK);
-            root.getChildren().add(poligono);
-        }
+        root.getChildren().addAll(
+                IntStream.range(0, pontosPoligonos.size())
+                        .mapToObj(i -> criarPoligono(pontosPoligonos.get(i), i))
+                        .toList()
+        );
 
         final List<String> perimetros = perimetros().stream().map(p -> String.format("%.1f", p)).toList();
         final var label1 = newLabel("Perímetro dos Polígonos: " + perimetros, 500);
@@ -132,7 +128,7 @@ public class PoligonosApp extends Application {
      */
     protected List<String> tipoPoligonos(){
         return pontosPoligonos.stream()
-                .flatMap(this::tipoPoligono)
+                .flatMap(this::nomePoligono)
                 .toList();
     }
 
@@ -183,7 +179,7 @@ public class PoligonosApp extends Application {
 
     }
 
-    private Stream<String> tipoPoligono(List<Point> points) {
+    private Stream<String> nomePoligono(List<Point> points) {
         int size = points.size();
         return switch (size) {
             case 3 -> Stream.of("Triângulo");
@@ -198,6 +194,18 @@ public class PoligonosApp extends Application {
         return Stream.of(points.stream()
                 .reduce(points.get(points.size() - 1), Point::new)
                 .distance());
+    }
+
+    private Polygon criarPoligono(List<Point> pontos, int index) {
+        final var poligono = new Polygon();
+
+        pontos.forEach(point -> poligono.getPoints().addAll(point.x(), point.y()));
+
+        Color[] cores = {Color.CADETBLUE, Color.CORAL, Color.LIGHTGREEN, Color.GOLD, Color.PLUM};
+        poligono.setFill(cores[index % cores.length]);
+        poligono.setStroke(Color.BLACK);
+
+        return poligono;
     }
 }
 
